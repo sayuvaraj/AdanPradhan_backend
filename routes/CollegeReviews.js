@@ -83,28 +83,58 @@ router.put('/api/bookings/:bookingId/reviewed', async (req, res) => {
     }
   });
 
-  router.post('/course-reviews', async (req, res) => {
-    try {
-        const { name, email, review, rating, college, courseName } = req.body;
+//   router.post('/course-reviews', async (req, res) => {
+//     try {
+//         const { name, email, review, rating, college, courseName,bookingId } = req.body;
 
-        // Create a new course review instance
-        const newReview = new CourseReview({
-            name,
-            email,
-            review,
-            rating,
-            college,
-            courseName
-        });
+//         // Create a new course review instance
+//         const newReview = new CourseReview({
+//             name,
+//             email,
+//             review,
+//             rating,
+//             college,
+//             courseName
+//         });
 
-        // Save the review to the database
-        const savedReview = await newReview.save();
+//         // Save the review to the database
+//         const savedReview = await newReview.save();
 
-        res.status(201).json(savedReview);
-    } catch (error) {
-        console.error('Error saving course review:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+//         res.status(201).json(savedReview);
+//     } catch (error) {
+//         console.error('Error saving course review:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+router.post('/course-reviews', async (req, res) => {
+  try {
+      const { name, email, review, rating, college, courseName, bookingId } = req.body;
+
+      // Create a new course review instance
+      const newReview = new CourseReview({
+          name,
+          email,
+          review,
+          rating,
+          college,
+          courseName
+      });
+
+      // Save the review to the database
+      const savedReview = await newReview.save();
+
+      // Update isReviewed field in booking collection
+      await Booking.findOneAndUpdate(
+          { _id: bookingId },
+          { isReviewed: true }
+      );
+
+      res.status(201).json(savedReview);
+  } catch (error) {
+      console.error('Error saving course review:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
+
 
 module.exports =  router;
